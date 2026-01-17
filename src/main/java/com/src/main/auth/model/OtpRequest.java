@@ -4,6 +4,8 @@ import java.time.Instant;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -11,8 +13,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "refresh_tokens")
-public class RefreshToken {
+@Table(name = "otp_requests")
+public class OtpRequest {
 	@Id
 	@Column(name = "id", nullable = false, updatable = false)
 	private String id;
@@ -20,17 +22,18 @@ public class RefreshToken {
 	@Column(name = "user_id", nullable = false)
 	private String userId;
 
-	@Column(name = "family_id", nullable = false)
-	private String familyId;
+	@Enumerated(EnumType.STRING)
+	@Column(name = "purpose", nullable = false)
+	private OtpPurpose purpose;
 
-	@Column(name = "token_hash", nullable = false)
-	private String tokenHash;
+	@Column(name = "otp_hash", nullable = false)
+	private String otpHash;
 
 	@Column(name = "expires_at", nullable = false)
 	private Instant expiresAt;
 
-	@Column(name = "revoked", nullable = false)
-	private boolean revoked;
+	@Column(name = "used", nullable = false)
+	private boolean used;
 
 	@Column(name = "created_at", nullable = false, updatable = false)
 	private Instant createdAt;
@@ -63,20 +66,20 @@ public class RefreshToken {
 		this.userId = userId;
 	}
 
-	public String getFamilyId() {
-		return familyId;
+	public OtpPurpose getPurpose() {
+		return purpose;
 	}
 
-	public void setFamilyId(String familyId) {
-		this.familyId = familyId;
+	public void setPurpose(OtpPurpose purpose) {
+		this.purpose = purpose;
 	}
 
-	public String getTokenHash() {
-		return tokenHash;
+	public String getOtpHash() {
+		return otpHash;
 	}
 
-	public void setTokenHash(String tokenHash) {
-		this.tokenHash = tokenHash;
+	public void setOtpHash(String otpHash) {
+		this.otpHash = otpHash;
 	}
 
 	public Instant getExpiresAt() {
@@ -87,12 +90,12 @@ public class RefreshToken {
 		this.expiresAt = expiresAt;
 	}
 
-	public boolean isRevoked() {
-		return revoked;
+	public boolean isUsed() {
+		return used;
 	}
 
-	public void setRevoked(boolean revoked) {
-		this.revoked = revoked;
+	public void setUsed(boolean used) {
+		this.used = used;
 	}
 
 	public Instant getCreatedAt() {
