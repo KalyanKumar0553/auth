@@ -23,52 +23,30 @@ import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 
 import com.src.main.auth.model.IdentifierType;
 import com.src.main.auth.model.Role;
-import com.src.main.auth.model.TenantRole;
 import com.src.main.auth.model.User;
 import com.src.main.auth.model.UserStatus;
 import com.src.main.auth.repository.RoleRepository;
-import com.src.main.auth.repository.TenantRoleRepository;
 import com.src.main.auth.repository.UserRepository;
 import com.src.main.auth.repository.UserRoleRepository;
-import com.src.main.auth.repository.UserTenantRepository;
-import com.src.main.auth.repository.UserTenantRoleRepository;
-import com.src.main.auth.repository.UserTenantVerificationRepository;
-import com.src.main.auth.tenant.TenantConfig;
-import com.src.main.auth.tenant.TenantContextService;
 import com.src.main.auth.util.CryptoUtils;
 
 @Service
 public class OauthService {
 	private final UserRepository userRepository;
 	private final RoleRepository roleRepository;
-	private final TenantRoleRepository tenantRoleRepository;
 	private final UserRoleRepository userRoleRepository;
-	private final UserTenantRepository userTenantRepository;
-	private final UserTenantRoleRepository userTenantRoleRepository;
-	private final UserTenantVerificationRepository userTenantVerificationRepository;
-	private final TenantContextService tenantContext;
 	private final String googleClientId;
 	private final String appleClientId;
 
 	public OauthService(
 			UserRepository userRepository,
 			RoleRepository roleRepository,
-			TenantRoleRepository tenantRoleRepository,
 			UserRoleRepository userRoleRepository,
-			UserTenantRepository userTenantRepository,
-			UserTenantRoleRepository userTenantRoleRepository,
-			UserTenantVerificationRepository userTenantVerificationRepository,
-			TenantContextService tenantContext,
 			@Value("${oauth.google.client-id:}") String googleClientId,
 			@Value("${oauth.apple.client-id:}") String appleClientId) {
 		this.userRepository = userRepository;
 		this.roleRepository = roleRepository;
-		this.tenantRoleRepository = tenantRoleRepository;
 		this.userRoleRepository = userRoleRepository;
-		this.userTenantRepository = userTenantRepository;
-		this.userTenantRoleRepository = userTenantRoleRepository;
-		this.userTenantVerificationRepository = userTenantVerificationRepository;
-		this.tenantContext = tenantContext;
 		this.googleClientId = googleClientId;
 		this.appleClientId = appleClientId;
 	}
@@ -123,7 +101,6 @@ public class OauthService {
 	}
 
 	public String upsertOauthUser(String email) {
-		TenantConfig tenant = getTenant();
 		String identifier = email.trim().toLowerCase();
 		User existing = userRepository.findByIdentifier(identifier).orElse(null);
 		if (existing != null) {
@@ -131,7 +108,6 @@ public class OauthService {
 				existing.setStatus(UserStatus.ACTIVE);
 				userRepository.save(existing);
 			}
-			ensureMembership(existing.getId(), tenant.getId());
 			return existing.getId();
 		}
 
@@ -149,24 +125,6 @@ public class OauthService {
 		userRole.setRoleName("ROLE_USER");
 		userRoleRepo.save(userRole);
 
-		TenantRole tenantRole = ensureTenantRole(tenant.getId(), "ROLE_USER");
-		com.src.main.auth.model.UserTenant userTenant = new com.src.main.auth.model.UserTenant();
-		userTenant.setUserId(user.getId());
-		userTenant.setTenantId(tenant.getId());
-		userTenant.setActive(true);
-		userTenantRepository.save(userTenant);
-
-		com.src.main.auth.model.UserTenantRole assign = new com.src.main.auth.model.UserTenantRole();
-		assign.setUserId(user.getId());
-		assign.setTenantRoleId(tenantRole.getId());
-		userTenantRoleRepository.save(assign);
-
-		com.src.main.auth.model.UserTenantVerification verification = new com.src.main.auth.model.UserTenantVerification();
-		verification.setUserId(user.getId());
-		verification.setTenantId(tenant.getId());
-		verification.setEmailVerified(true);
-		userTenantVerificationRepository.save(verification);
-
 		return user.getId();
 	}
 
@@ -176,35 +134,5 @@ public class OauthService {
 			role.setName(name);
 			roleRepository.save(role);
 		}
-	}
-
-	private TenantRole ensureTenantRole(String tenantId, String name) {
-		return tenantRoleRepository.findByTenantIdAndName(tenantId, name)
-				.orElseGet(() -> {
-					TenantRole role = new TenantRole();
-					role.setTenantId(tenantId);
-					role.setName(name);
-					role.setActive(true);
-					return tenantRoleRepository.save(role);
-				});
-	}
-
-	private TenantConfig getTenant() {
-		TenantConfig tenant = tenantContext.getTenant();
-		if (tenant == null) {
-			throw new IllegalArgumentException("Tenant context is not set");
-		}
-		return tenant;
-	}
-
-	private void ensureMembership(String userId, String tenantId) {
-		userTenantRepository.findByUserIdAndTenantIdAndIsActiveTrue(userId, tenantId)
-				.orElseGet(() -> {
-					com.src.main.auth.model.UserTenant tenant = new com.src.main.auth.model.UserTenant();
-					tenant.setUserId(userId);
-					tenant.setTenantId(tenantId);
-					tenant.setActive(true);
-					return userTenantRepository.save(tenant);
-				});
 	}
 }

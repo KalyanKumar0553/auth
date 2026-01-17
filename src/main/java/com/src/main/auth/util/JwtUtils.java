@@ -19,28 +19,35 @@ public class JwtUtils {
 		this.secret = secret.getBytes(StandardCharsets.UTF_8);
 	}
 
-	public String signAccess(String userId, List<String> roles, String tenantCode, long ttlSeconds) {
-		return signToken(new JwtClaims(userId, "access", null, roles, tenantCode), ttlSeconds);
+	public String signAccess(String userId, List<String> roles, long ttlSeconds) {
+		return signToken(new JwtClaims(userId, "access", null, roles), ttlSeconds);
 	}
 
-	public String signRefresh(String userId, String refreshId, String tenantCode, long ttlSeconds) {
-		return signToken(new JwtClaims(userId, "refresh", refreshId, null, tenantCode), ttlSeconds);
+	public String signRefresh(String userId, String refreshId, long ttlSeconds) {
+		return signToken(new JwtClaims(userId, "refresh", refreshId, null), ttlSeconds);
 	}
 
 	public JwtClaims parse(String token) {
-		Claims claims = Jwts.parserBuilder()
+		Claims claims = parseClaims(token);
+
+		String sub = claims.getSubject();
+		String typ = (String) claims.get("typ");
+		String rid = (String) claims.get("rid");
+		List<String> roles = claims.get("roles", List.class);
+		return new JwtClaims(sub, typ, rid, roles);
+	}
+
+	public Claims parseClaims(String token) {
+		return Jwts.parserBuilder()
 				.setSigningKey(Keys.hmacShaKeyFor(secret))
 				.requireIssuer(issuer)
 				.build()
 				.parseClaimsJws(token)
 				.getBody();
+	}
 
-		String sub = claims.getSubject();
-		String typ = (String) claims.get("typ");
-		String rid = (String) claims.get("rid");
-		String tenantCode = (String) claims.get("tenantCode");
-		List<String> roles = claims.get("roles", List.class);
-		return new JwtClaims(sub, typ, rid, roles, tenantCode);
+	public Instant getExpiration(String token) {
+		return parseClaims(token).getExpiration().toInstant();
 	}
 
 	private String signToken(JwtClaims claims, long ttlSeconds) {
@@ -53,7 +60,6 @@ public class JwtUtils {
 				.claim("typ", claims.getTyp())
 				.claim("rid", claims.getRid())
 				.claim("roles", claims.getRoles())
-				.claim("tenantCode", claims.getTenantCode())
 				.signWith(Keys.hmacShaKeyFor(secret), SignatureAlgorithm.HS256)
 				.compact();
 	}

@@ -11,6 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.src.main.auth.repository.InvalidatedTokenRepository;
 import com.src.main.auth.util.JwtClaims;
 import com.src.main.auth.util.JwtUtils;
 
@@ -21,9 +22,11 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final JwtUtils jwtUtils;
+	private final InvalidatedTokenRepository invalidatedTokenRepository;
 
-	public JwtAuthenticationFilter(JwtUtils jwtUtils) {
+	public JwtAuthenticationFilter(JwtUtils jwtUtils, InvalidatedTokenRepository invalidatedTokenRepository) {
 		this.jwtUtils = jwtUtils;
+		this.invalidatedTokenRepository = invalidatedTokenRepository;
 	}
 
 	@Override
@@ -32,6 +35,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 		if (header != null && header.startsWith("Bearer ")) {
 			String token = header.substring(7);
+			if (invalidatedTokenRepository.existsByToken(token)) {
+				SecurityContextHolder.clearContext();
+				filterChain.doFilter(request, response);
+				return;
+			}
 			try {
 				JwtClaims claims = jwtUtils.parse(token);
 				List<SimpleGrantedAuthority> authorities = claims.getRoles() == null

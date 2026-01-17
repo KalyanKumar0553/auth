@@ -1,0 +1,6 @@
+DROP TABLE IF EXISTS user_tenant_roles CASCADE;
+DROP TABLE IF EXISTS tenant_roles CASCADE;
+DROP TABLE IF EXISTS user_tenant_verifications CASCADE;
+DROP TABLE IF EXISTS user_tenants CASCADE;
+DROP TABLE IF EXISTS tenant_sha_keys CASCADE;
+DROP TABLE IF EXISTS tenants CASCADE;

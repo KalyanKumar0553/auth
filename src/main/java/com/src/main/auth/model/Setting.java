@@ -2,6 +2,8 @@ package com.src.main.auth.model;
 
 import java.time.Instant;
 
+import java.util.UUID;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -14,7 +16,7 @@ import jakarta.persistence.Table;
 public class Setting {
 	@Id
 	@Column(name = "id", nullable = false, updatable = false)
-	private String id;
+	private UUID id;
 
 	@Column(name = "source", nullable = false)
 	private String source;
@@ -40,7 +42,7 @@ public class Setting {
 	@PrePersist
 	public void prePersist() {
 		if (id == null) {
-			id = java.util.UUID.randomUUID().toString();
+			id = UUID.randomUUID();
 		}
 		Instant now = Instant.now();
 		createdAt = now;
@@ -52,11 +54,11 @@ public class Setting {
 		updatedAt = Instant.now();
 	}
 
-	public String getId() {
+	public UUID getId() {
 		return id;
 	}
 
-	public void setId(String id) {
+	public void setId(UUID id) {
 		this.id = id;
 	}
 

@@ -8,22 +8,18 @@ import org.springframework.stereotype.Service;
 
 import com.src.main.auth.model.CaptchaChallenge;
 import com.src.main.auth.repository.CaptchaChallengeRepository;
-import com.src.main.auth.tenant.TenantContextService;
 import com.src.main.auth.util.CryptoUtils;
 
 @Service
 public class CaptchaService {
 	private final CaptchaChallengeRepository repository;
-	private final TenantContextService tenantContext;
 	private final int ttlSeconds;
 	private final Random random = new Random();
 
 	public CaptchaService(
 			CaptchaChallengeRepository repository,
-			TenantContextService tenantContext,
 			@Value("${captcha.ttl.seconds:300}") int ttlSeconds) {
 		this.repository = repository;
-		this.tenantContext = tenantContext;
 		this.ttlSeconds = ttlSeconds;
 	}
 
@@ -31,11 +27,10 @@ public class CaptchaService {
 		String answer = randomText(5);
 		String id = CryptoUtils.uuid();
 		Instant expiresAt = Instant.now().plusSeconds(ttlSeconds);
-		String hashKey = tenantContext.getTenant() != null ? tenantContext.getTenant().getShaKey() : null;
 
 		CaptchaChallenge challenge = new CaptchaChallenge();
 		challenge.setId(id);
-		challenge.setAnswerHash(CryptoUtils.sha256Base64(answer.toLowerCase(), hashKey));
+		challenge.setAnswerHash(CryptoUtils.sha256Base64(answer.toLowerCase(), null));
 		challenge.setExpiresAt(expiresAt);
 		challenge.setUsed(false);
 		repository.save(challenge);
@@ -57,8 +52,7 @@ public class CaptchaService {
 			throw new IllegalArgumentException("Captcha expired");
 		}
 
-		String hashKey = tenantContext.getTenant() != null ? tenantContext.getTenant().getShaKey() : null;
-		String expected = CryptoUtils.sha256Base64(captchaText.trim().toLowerCase(), hashKey);
+		String expected = CryptoUtils.sha256Base64(captchaText.trim().toLowerCase(), null);
 		if (!expected.equals(challenge.getAnswerHash())) {
 			throw new IllegalArgumentException("Captcha mismatch");
 		}

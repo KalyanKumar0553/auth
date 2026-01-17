@@ -9,24 +9,19 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.src.main.auth.repository.TenantRepository;
-import com.src.main.auth.repository.TenantShaKeyRepository;
+import com.src.main.auth.repository.InvalidatedTokenRepository;
 import com.src.main.auth.security.JwtAuthenticationFilter;
-import com.src.main.auth.security.TenantContextFilter;
-import com.src.main.auth.tenant.TenantContextService;
 import com.src.main.auth.util.JwtUtils;
 
 @Configuration
 @EnableMethodSecurity
+@org.springframework.core.annotation.Order(3)
 public class SecurityConfig {
 	@Value("${jwt.secret:change-me}")
 	private String jwtSecret;
 
 	@Value("${jwt.issuer:auth-service}")
 	private String jwtIssuer;
-
-	@Value("${tenant.header.name:x-tenant-code}")
-	private String tenantHeader;
 
 	@Bean
 	public JwtUtils jwtUtils() {
@@ -36,21 +31,18 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain filterChain(
 			HttpSecurity http,
-			TenantRepository tenantRepository,
-			TenantShaKeyRepository tenantShaKeyRepository,
-			TenantContextService tenantContextService,
+			InvalidatedTokenRepository invalidatedTokenRepository,
 			JwtUtils jwtUtils) throws Exception {
 		http.csrf(csrf -> csrf.disable())
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/health").permitAll()
+						.requestMatchers("/health", "/actuator/health").permitAll()
 						.requestMatchers("/api/v1/auth/**").permitAll()
+						.requestMatchers("/api/v1/admin/auth/**").permitAll()
+						.requestMatchers("/api/v1/admin/swagger/token").authenticated()
 						.anyRequest().authenticated());
 
-		http.addFilterBefore(
-				new TenantContextFilter(tenantRepository, tenantShaKeyRepository, tenantContextService, tenantHeader),
-				UsernamePasswordAuthenticationFilter.class);
-		http.addFilterBefore(new JwtAuthenticationFilter(jwtUtils), UsernamePasswordAuthenticationFilter.class);
+		http.addFilterBefore(new JwtAuthenticationFilter(jwtUtils, invalidatedTokenRepository), UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
 }

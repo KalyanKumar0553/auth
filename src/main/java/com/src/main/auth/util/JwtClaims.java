@@ -7,16 +7,14 @@ public class JwtClaims {
 	private String typ;
 	private String rid;
 	private List<String> roles;
-	private String tenantCode;
 
 	public JwtClaims() {}
 
-	public JwtClaims(String sub, String typ, String rid, List<String> roles, String tenantCode) {
+	public JwtClaims(String sub, String typ, String rid, List<String> roles) {
 		this.sub = sub;
 		this.typ = typ;
 		this.rid = rid;
 		this.roles = roles;
-		this.tenantCode = tenantCode;
 	}
 
 	public String getSub() {
@@ -49,13 +47,5 @@ public class JwtClaims {
 
 	public void setRoles(List<String> roles) {
 		this.roles = roles;
-	}
-
-	public String getTenantCode() {
-		return tenantCode;
-	}
-
-	public void setTenantCode(String tenantCode) {
-		this.tenantCode = tenantCode;
 	}
 }
