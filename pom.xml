@@ -10,8 +10,8 @@
 		<java.version>17</java.version>
 		<spring-boot.version>3.3.4</spring-boot.version>
 		<lombok.version>1.18.36</lombok.version>
-		<common.version>1.0.0</common.version>
-		<communication.version>1.0.0</communication.version>
+		<common.version>1.0.2</common.version>
+		<communication.version>1.0.2</communication.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
