@@ -29,12 +29,13 @@ public class JwtUtils {
 
 	public JwtClaims parse(String token) {
 		Claims claims = parseClaims(token);
-
 		String sub = claims.getSubject();
 		String typ = (String) claims.get("typ");
 		String rid = (String) claims.get("rid");
 		List<String> roles = claims.get("roles", List.class);
-		return new JwtClaims(sub, typ, rid, roles);
+		JwtClaims parsed = new JwtClaims(sub, typ, rid, roles);
+		parsed.setExpiration(claims.getExpiration());
+		return parsed;
 	}
 
 	public Claims parseClaims(String token) {

@@ -1,7 +1,10 @@
 package com.src.main.auth.security;
 
 import java.io.IOException;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -42,6 +45,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			}
 			try {
 				JwtClaims claims = jwtUtils.parse(token);
+				Date expiration = claims.getExpiration();
+				if (expiration != null) {
+					DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+					String formatted = expiration.toInstant().atZone(ZoneId.systemDefault()).format(formatter);
+					response.setHeader("X-Token-Expires-At", formatted);
+				}
 				List<SimpleGrantedAuthority> authorities = claims.getRoles() == null
 						? Collections.emptyList()
 						: claims.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList());

@@ -2,7 +2,9 @@ package com.src.main.auth.service;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -370,7 +372,7 @@ public class AuthService {
 		String access = jwtUtils.signAccess(userId, roles, accessTtl);
 		String refreshId = CryptoUtils.uuid();
 		String refresh = jwtUtils.signRefresh(userId, refreshId, refreshTtl);
-
+		
 		RefreshToken token = new RefreshToken();
 		token.setId(refreshId);
 		token.setUserId(userId);
@@ -417,11 +419,6 @@ public class AuthService {
 		if (!assignments.isEmpty()) {
 			return assignments.stream().map(UserRole::getRoleName).collect(Collectors.toList());
 		}
-		ensureRole("ROLE_USER");
-		UserRole role = new UserRole();
-		role.setUserId(userId);
-		role.setRoleName("ROLE_USER");
-		userRoleRepository.save(role);
 		return List.of("ROLE_USER");
 	}
 }

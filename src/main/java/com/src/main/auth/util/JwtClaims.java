@@ -1,5 +1,6 @@
 package com.src.main.auth.util;
 
+import java.util.Date;
 import java.util.List;
 
 public class JwtClaims {
@@ -7,6 +8,7 @@ public class JwtClaims {
 	private String typ;
 	private String rid;
 	private List<String> roles;
+	private Date expiration;
 
 	public JwtClaims() {}
 
@@ -15,6 +17,14 @@ public class JwtClaims {
 		this.typ = typ;
 		this.rid = rid;
 		this.roles = roles;
+	}
+
+	public JwtClaims(String sub, String typ, String rid, List<String> roles, Date expiration) {
+		this.sub = sub;
+		this.typ = typ;
+		this.rid = rid;
+		this.roles = roles;
+		this.expiration = expiration;
 	}
 
 	public String getSub() {
@@ -47,5 +57,13 @@ public class JwtClaims {
 
 	public void setRoles(List<String> roles) {
 		this.roles = roles;
+	}
+
+	public Date getExpiration() {
+		return expiration;
+	}
+
+	public void setExpiration(Date expiration) {
+		this.expiration = expiration;
 	}
 }
