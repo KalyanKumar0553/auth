@@ -10,8 +10,7 @@
 		<java.version>17</java.version>
 		<spring-boot.version>3.3.4</spring-boot.version>
 		<lombok.version>1.18.38</lombok.version>
-		<common.version>1.0.2</common.version>
-		<communication.version>1.0.2</communication.version>
+		<platform-bom.version>1.0.0</platform-bom.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -22,18 +21,23 @@
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
+			<dependency>
+				<groupId>com.src</groupId>
+				<artifactId>platform-bom</artifactId>
+				<version>${platform-bom.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>com.src</groupId>
 			<artifactId>common</artifactId>
-			<version>${common.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.src</groupId>
 			<artifactId>communication</artifactId>
-			<version>${communication.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
