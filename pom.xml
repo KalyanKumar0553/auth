@@ -6,6 +6,12 @@
 	<artifactId>auth</artifactId>
 	<version>1.1.25</version>
 	<name>auth</name>
+	<repositories>
+		<repository>
+			<id>github-rest-app-generator</id>
+			<url>https://maven.pkg.github.com/KalyanKumar0553/rest-app-generator</url>
+		</repository>
+	</repositories>
 	<properties>
 		<java.version>17</java.version>
 		<spring-boot.version>3.3.4</spring-boot.version>
