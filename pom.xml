@@ -4,7 +4,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.src</groupId>
 	<artifactId>auth</artifactId>
-	<version>1.1.25</version>
+	<version>1.1.26</version>
 	<name>auth</name>
 	<repositories>
 		<repository>
@@ -16,7 +16,7 @@
 		<java.version>17</java.version>
 		<spring-boot.version>3.3.4</spring-boot.version>
 		<lombok.version>1.18.38</lombok.version>
-		<platform-bom.version>1.0.1</platform-bom.version>
+		<platform-bom.version>1.0.2</platform-bom.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>

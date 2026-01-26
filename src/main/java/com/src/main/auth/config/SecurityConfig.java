@@ -1,6 +1,7 @@
 package com.src.main.auth.config;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -8,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import com.src.main.auth.repository.InvalidatedTokenRepository;
 import com.src.main.auth.security.JwtAuthenticationFilter;
@@ -37,23 +39,23 @@ public class SecurityConfig {
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/health", "/actuator/health").permitAll()
+						.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
 						.requestMatchers(
-								"/favicon.ico",
-								"/assets/**",
-								"/static/**",
-								"/webjars/**",
-								"/**/*.css",
-								"/**/*.js",
-								"/**/*.map",
-								"/**/*.png",
-								"/**/*.jpg",
-								"/**/*.jpeg",
-								"/**/*.gif",
-								"/**/*.svg",
-								"/**/*.woff",
-								"/**/*.woff2",
-								"/**/*.ttf",
-								"/**/*.eot")
+								new AntPathRequestMatcher("/assets/**"),
+								new AntPathRequestMatcher("/static/**"),
+								new AntPathRequestMatcher("/webjars/**"),
+								new AntPathRequestMatcher("/**/*.css"),
+								new AntPathRequestMatcher("/**/*.js"),
+								new AntPathRequestMatcher("/**/*.map"),
+								new AntPathRequestMatcher("/**/*.png"),
+								new AntPathRequestMatcher("/**/*.jpg"),
+								new AntPathRequestMatcher("/**/*.jpeg"),
+								new AntPathRequestMatcher("/**/*.gif"),
+								new AntPathRequestMatcher("/**/*.svg"),
+								new AntPathRequestMatcher("/**/*.woff"),
+								new AntPathRequestMatcher("/**/*.woff2"),
+								new AntPathRequestMatcher("/**/*.ttf"),
+								new AntPathRequestMatcher("/**/*.eot"))
 								.permitAll()
 						.requestMatchers("/api/openapi/**").permitAll()
 						.requestMatchers("/api/v1/auth/**").permitAll()
